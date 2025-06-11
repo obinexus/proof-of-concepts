@@ -1,0 +1,1 @@
+gcc cloth_simulation.c -o cloth_simulation -lSDL2main -lSDL2

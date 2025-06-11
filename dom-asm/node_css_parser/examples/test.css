@@ -1,0 +1,275 @@
+/* Basic Selectors */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Type Selectors */
+  body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #fff;
+  }
+  
+  /* Class Selectors with Multiple Classes */
+  .header.dark {
+    background-color: #1a1a1a;
+    color: #ffffff;
+    padding: 20px;
+  }
+  
+  /* ID Selector */
+  #main-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  /* Attribute Selectors */
+  input[type="text"] {
+    border: 1px solid #ddd;
+    padding: 8px;
+    border-radius: 4px;
+  }
+  
+  a[href^="https"] {
+    color: #2ecc71;
+    text-decoration: none;
+  }
+  
+  /* Pseudo-classes */
+  .button:hover {
+    background-color: #3498db;
+    color: white;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-item:first-child {
+    margin-left: 0;
+  }
+  
+  .nav-item:last-child {
+    margin-right: 0;
+  }
+  
+  /* Pseudo-elements */
+  .card::before {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 2px;
+    background-color: #e74c3c;
+  }
+  
+  /* Combinators */
+  /* Descendant */
+  .container .widget {
+    background-color: #f9f9f9;
+    padding: 15px;
+  }
+  
+  /* Child */
+  .nav > .nav-item {
+    display: inline-block;
+    margin: 0 10px;
+  }
+  
+  /* Adjacent Sibling */
+  h2 + p {
+    font-size: 1.1em;
+    color: #666;
+  }
+  
+  /* General Sibling */
+  h2 ~ p {
+    margin-bottom: 10px;
+  }
+  
+  /* Media Queries */
+  @media screen and (max-width: 768px) {
+    .container {
+      width: 100%;
+      padding: 10px;
+    }
+    
+    .nav > .nav-item {
+      display: block;
+      margin: 5px 0;
+    }
+  }
+  
+  /* Animations */
+  @keyframes slideIn {
+    from {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  .animated {
+    animation: slideIn 0.5s ease-out;
+  }
+  
+  /* Custom Properties */
+  :root {
+    --primary-color: #3498db;
+    --secondary-color: #2ecc71;
+    --danger-color: #e74c3c;
+  }
+  
+  .custom-theme {
+    background-color: var(--primary-color);
+    border: 2px solid var(--secondary-color);
+  }
+  
+  /* Complex Selectors */
+  .container .widget:not(:first-child):hover > .widget-content {
+    transform: scale(1.05);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Multiple Selectors */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Helvetica Neue', sans-serif;
+    margin-bottom: 1rem;
+  }
+  
+  /* Units and Values */
+  .flexible-container {
+    width: 80%;
+    max-width: 1200px;
+    min-height: 50vh;
+    padding: 2rem;
+    margin: 20px auto;
+    font-size: 1.1em;
+    line-height: 1.5;
+    opacity: 0.9;
+    background-color: rgba(255, 255, 255, 0.95);
+  }
+  
+  /* Gradients and Multiple Backgrounds */
+  .hero-section {
+    background-image: 
+      linear-gradient(to bottom, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.3)),
+      url('/images/hero.jpg');
+    background-size: cover;
+    background-position: center;
+    padding: 100px 0;
+    color: white;
+  }
+  
+  /* Transforms and Transitions */
+  .card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Grid Layout */
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  /* Flexbox */
+  .flex-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  
+  /* CSS Custom Properties with Fallbacks */
+  .theme-aware {
+    color: var(--text-color, #333);
+    background-color: var(--bg-color, #fff);
+    border: 1px solid var(--border-color, #ddd);
+  }
+  
+  /* Calc Function */
+  .dynamic-width {
+    width: calc(100% - 40px);
+    margin: calc(2rem + 10px) auto;
+  }
+  
+  /* Support for RTL */
+  [dir="rtl"] .sidebar {
+    float: left;
+    margin-left: 0;
+    margin-right: 20px;
+  }
+  
+  /* Print Styles */
+  @media print {
+    .no-print {
+      display: none;
+    }
+    
+    body {
+      font-size: 12pt;
+      line-height: 1.5;
+      color: #000;
+    }
+  }
+  
+  /* Vendor Prefixes */
+  .hardware-accelerated {
+    -webkit-transform: translateZ(0);
+    -moz-transform: translateZ(0);
+    -ms-transform: translateZ(0);
+    -o-transform: translateZ(0);
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+  
+  /* CSS Variables with Color Functions */
+  .color-functions {
+    background-color: rgba(var(--primary-rgb), 0.1);
+    border-color: rgb(var(--primary-rgb));
+    color: rgb(var(--text-rgb));
+  }
+  
+  /* Supports Query */
+  @supports (display: grid) {
+    .modern-layout {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+  }
+  
+  /* Container Query */
+  @container (min-width: 400px) {
+    .responsive-element {
+      font-size: 1.2em;
+      padding: 2rem;
+    }
+  }
+  
+  /* Complex Animations */
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+      transform: translateY(0);
+    }
+    40% {
+      transform: translateY(-30px);
+    }
+    60% {
+      transform: translateY(-15px);
+    }
+  }
+  
+  .bounce {
+    animation: bounce 2s infinite;
+  }

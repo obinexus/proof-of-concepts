@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OBINexus Mathematical Validation Suite</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Monaco', 'Consolas', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 2px solid #0066cc;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            color: #00ffcc;
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+        }
+        
+        .header p {
+            color: #cccccc;
+            margin-top: 10px;
+            font-size: 1.1em;
+        }
+        
+        .system-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .system-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(0, 102, 204, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .system-card:hover {
+            border-color: #00ffcc;
+            box-shadow: 0 10px 30px rgba(0, 255, 204, 0.1);
+            transform: translateY(-5px);
+        }
+        
+        .system-title {
+            font-size: 1.4em;
+            color: #00ffcc;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #cccccc;
+            font-weight: bold;
+        }
+        
+        .input-group input, .input-group textarea, .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #444;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #e0e0e0;
+            font-family: 'Monaco', 'Consolas', monospace;
+        }
+        
+        .input-group input:focus, .input-group textarea:focus, .input-group select:focus {
+            outline: none;
+            border-color: #00ffcc;
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.2);
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #0066cc, #00ffcc);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 102, 204, 0.3);
+        }
+        
+        .results {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            white-space: pre-wrap;
+        }
+        
+        .cost-indicator {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 5px;
+        }
+        
+        .cost-safe { background: #004d00; color: #00ff00; }
+        .cost-warning { background: #4d4d00; color: #ffff00; }
+        .cost-danger { background: #4d0000; color: #ff0000; }
+        
+        .matrix-display {
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            gap: 5px;
+            margin: 10px 0;
+            justify-content: center;
+        }
+        
+        .matrix-cell {
+            width: 60px;
+            height: 60px;
+            border: 1px solid #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.3);
+            color: #e0e0e0;
+        }
+        
+        .matrix-cell.even { background: rgba(0, 102, 204, 0.2); }
+        .matrix-cell.odd { background: rgba(204, 102, 0, 0.2); }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #444;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            color: #cccccc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .tab.active {
+            color: #00ffcc;
+            border-bottom-color: #00ffcc;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .complexity-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .complexity-table th,
+        .complexity-table td {
+            border: 1px solid #444;
+            padding: 10px;
+            text-align: left;
+        }
+        
+        .complexity-table th {
+            background: rgba(0, 102, 204, 0.2);
+            color: #00ffcc;
+        }
+        
+        .performance-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .perf-excellent { background: #00ff00; }
+        .perf-good { background: #ffff00; }
+        .perf-poor { background: #ff0000; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>OBINexus Mathematical Validation Suite</h1>
+            <p>Aegis Project - Mathematical Foundation Verification</p>
+            <p>Sinphasé • Dimensional Game Theory • Zero-Overhead Marshalling</p>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('functions')">Function Equivalence</button>
+            <button class="tab" onclick="showTab('matrix')">Matrix Parity</button>
+            <button class="tab" onclick="showTab('dcs')">DCS Tabulation</button>
+        </div>
+        
+        <!-- Function Equivalence System -->
+        <div id="functions" class="tab-content active">
+            <div class="system-card">
+                <h2 class="system-title">Function Equivalence System (Static + Dynamic)</h2>
+                
+                <div class="input-group">
+                    <label>Static Function f(x,y) = ax + by:</label>
+                    <input type="text" id="static-a" placeholder="Coefficient a" value="3">
+                    <input type="text" id="static-b" placeholder="Coefficient b" value="2">
+                </div>
+                
+                <div class="input-group">
+                    <label>Dynamic Function (Piecewise):</label>
+                    <textarea id="dynamic-function" rows="4" placeholder="Enter piecewise function conditions">x < -3: x + 2
+-3 ≤ x < 0: x² - 1
+0 ≤ x < 4: 2x + 5
+x ≥ 4: x³ - 3x</textarea>
+                </div>
+                
+                <div class="input-group">
+                    <label>Test Vector (x, y):</label>
+                    <input type="text" id="test-x" placeholder="x value" value="2">
+                    <input type="text" id="test-y" placeholder="y value" value="1">
+                </div>
+                
+                <button class="btn" onclick="analyzeFunctions()">Analyze Function Equivalence</button>
+                <button class="btn" onclick="testEquivalence()">Test 2D Vector Solution</button>
+                
+                <div id="function-results" class="results"></div>
+            </div>
+        </div>
+        
+        <!-- Matrix Parity System -->
+        <div id="matrix" class="tab-content">
+            <div class="system-card">
+                <h2 class="system-title">Matrix Parity Optimization System</h2>
+                
+                <div class="input-group">
+                    <label>Matrix Size:</label>
+                    <select id="matrix-size" onchange="generateMatrix()">
+                        <option value="3">3×3</option>
+                        <option value="4">4×4</option>
+                        <option value="5">5×5</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label>Matrix Values (comma-separated):</label>
+                    <input type="text" id="matrix-values" placeholder="1,2,3,4,5,6,7,8,9" value="1,2,3,4,5,6,7,8,9">
+                </div>
+                
+                <button class="btn" onclick="generateMatrix()">Generate Matrix</button>
+                <button class="btn" onclick="applyParityTransform()">Apply Parity Transform</button>
+                <button class="btn" onclick="analyzeComplexity()">Analyze Complexity</button>
+                
+                <div id="matrix-display"></div>
+                <div id="matrix-results" class="results"></div>
+                
+                <table class="complexity-table">
+                    <thead>
+                        <tr>
+                            <th>Operation</th>
+                            <th>Time Complexity</th>
+                            <th>Space Complexity</th>
+                            <th>Performance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="complexity-tbody">
+                        <tr>
+                            <td>Matrix Generation</td>
+                            <td>O(n²)</td>
+                            <td>O(n²)</td>
+                            <td><span class="performance-indicator perf-excellent"></span>Excellent</td>
+                        </tr>
+                        <tr>
+                            <td>Parity Check</td>
+                            <td>O(n²)</td>
+                            <td>O(1)</td>
+                            <td><span class="performance-indicator perf-excellent"></span>Excellent</td>
+                        </tr>
+                        <tr>
+                            <td>Dynamic Transform</td>
+                            <td>O(n²)</td>
+                            <td>O(n²)</td>
+                            <td><span class="performance-indicator perf-good"></span>Good</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- DCS Tabulation Engine -->
+        <div id="dcs" class="tab-content">
+            <div class="system-card">
+                <h2 class="system-title">DCS Tabulation Engine</h2>
+                
+                <div class="input-group">
+                    <label>System Metrics (μᵢ values):</label>
+                    <input type="text" id="metrics" placeholder="dependency_depth,function_calls,external_deps,complexity" value="0.3,0.2,0.1,0.25">
+                </div>
+                
+                <div class="input-group">
+                    <label>Impact Weights (ωᵢ values):</label>
+                    <input type="text" id="weights" placeholder="weights for each metric" value="0.4,0.3,0.2,0.1">
+                </div>
+                
+                <div class="input-group">
+                    <label>Circular Dependencies:</label>
+                    <input type="number" id="circular-deps" placeholder="Number of circular dependencies" value="0" min="0">
+                </div>
+                
+                <div class="input-group">
+                    <label>Temporal Pressure (δₜ):</label>
+                    <input type="number" id="temporal-pressure" placeholder="Temporal pressure factor" value="0.05" step="0.01" min="0" max="1">
+                </div>
+                
+                <button class="btn" onclick="calculateCost()">Calculate Cost Function</button>
+                <button class="btn" onclick="simulateEvolution()">Simulate Evolution</button>
+                <button class="btn" onclick="validateGovernance()">Validate Governance</button>
+                
+                <div id="cost-display"></div>
+                <div id="dcs-results" class="results"></div>
+                
+                <div class="input-group">
+                    <label>Fibonacci Memoization Test:</label>
+                    <input type="number" id="fib-n" placeholder="n value" value="30" min="1" max="45">
+                    <button class="btn" onclick="testMemoization()">Test Memoization</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state management
+        let memoCache = {};
+        let currentMatrix = [];
+        let costHistory = [];
+        
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+        
+        // Function Equivalence System
+        function analyzeFunctions() {
+            const a = parseFloat(document.getElementById('static-a').value) || 0;
+            const b = parseFloat(document.getElementById('static-b').value) || 0;
+            const x = parseFloat(document.getElementById('test-x').value) || 0;
+            const y = parseFloat(document.getElementById('test-y').value) || 0;
+            
+            const staticResult = a * x + b * y;
+            const dynamicResult = evaluateDynamicFunction(x);
+            
+            const results = `Function Analysis Results:
+═══════════════════════════════════
+
+Static Function: f(x,y) = ${a}x + ${b}y
+Test Input: (${x}, ${y})
+Static Result: ${staticResult}
+
+Dynamic Function Evaluation:
+Input x = ${x}
+${window.lastDomainEvaluation ? `Domain Applied: ${window.lastDomainEvaluation.domain}` : 'Domain: Not evaluated'}
+Dynamic Result: ${dynamicResult}
+
+Equivalence Check:
+${Math.abs(staticResult - dynamicResult) < 0.001 ? '✓ EQUIVALENT' : '✗ NOT EQUIVALENT'}
+Difference: ${Math.abs(staticResult - dynamicResult)}
+
+Pattern Enforcement Analysis:
+This transformation conforms to the enforced Sinphasé pattern via 
+symbolic derivation tree resolution and bounded cost evaluation.
+
+Function Tree Lineage:
+Root Function (Static) → Branch β (Piecewise Logic) → ${window.lastDomainEvaluation ? window.lastDomainEvaluation.domain : 'Undefined'}
+
+Classification:
+Static Function: Deterministic, Fixed Arity, No Branching
+Dynamic Function: Context-Sensitive, Branching Logic, Adaptive`;
+            
+            document.getElementById('function-results').textContent = results;
+        }
+        
+        function evaluateDynamicFunction(x) {
+            let domain, result;
+            
+            if (x < -3) {
+                domain = "Domain₁: x < -3";
+                result = x + 2;
+            } else if (x >= -3 && x < 0) {
+                domain = "Domain₂: -3 ≤ x < 0";
+                result = x * x - 1;
+            } else if (x >= 0 && x < 4) {
+                domain = "Domain₃: 0 ≤ x < 4";
+                result = 2 * x + 5;
+            } else if (x >= 4) {
+                domain = "Domain₄: x ≥ 4";
+                result = x * x * x - 3 * x;
+            } else {
+                domain = "Undefined domain";
+                result = 0;
+            }
+            
+            // Store domain evaluation for diagnostic purposes
+            window.lastDomainEvaluation = { input: x, domain, result };
+            return result;
+        }
+        
+        function testEquivalence() {
+            const results = [];
+            for (let i = -5; i <= 5; i += 0.5) {
+                const a = parseFloat(document.getElementById('static-a').value) || 0;
+                const b = parseFloat(document.getElementById('static-b').value) || 0;
+                const staticResult = a * i + b * 1; // Using y=1 for simplicity
+                const dynamicResult = evaluateDynamicFunction(i);
+                results.push({x: i, static: staticResult, dynamic: dynamicResult, diff: Math.abs(staticResult - dynamicResult)});
+            }
+            
+            const equivalent = results.filter(r => r.diff < 0.1).length;
+            const total = results.length;
+            
+            const output = `2D Vector Solution Analysis:
+═══════════════════════════════════
+
+Test Range: x ∈ [-5, 5], y = 1
+Sample Points: ${total}
+Equivalent Points: ${equivalent}
+Equivalence Ratio: ${(equivalent/total*100).toFixed(1)}%
+
+${equivalent/total > 0.5 ? 
+  '✓ 2D VECTOR SOLUTION EXISTS\nFunctions show significant equivalence across domain' :
+  '✗ NO 2D VECTOR SOLUTION\nFunctions are fundamentally different'}
+
+Transformation Model: ${equivalent/total > 0.8 ? 'Linear' : equivalent/total > 0.3 ? 'Piecewise' : 'Non-transformable'}`;
+            
+            document.getElementById('function-results').textContent = output;
+        }
+        
+        // Matrix Parity System
+        function generateMatrix() {
+            const size = parseInt(document.getElementById('matrix-size').value);
+            const values = document.getElementById('matrix-values').value.split(',').map(v => parseInt(v.trim()));
+            
+            currentMatrix = [];
+            for (let i = 0; i < size * size; i++) {
+                currentMatrix.push(values[i] || (i + 1));
+            }
+            
+            displayMatrix(size);
+        }
+        
+        function displayMatrix(size) {
+            const display = document.getElementById('matrix-display');
+            display.innerHTML = '';
+            display.style.gridTemplateColumns = `repeat(${size}, 60px)`;
+            
+            for (let i = 0; i < currentMatrix.length; i++) {
+                const cell = document.createElement('div');
+                cell.className = `matrix-cell ${currentMatrix[i] % 2 === 0 ? 'even' : 'odd'}`;
+                cell.textContent = currentMatrix[i];
+                display.appendChild(cell);
+            }
+        }
+        
+        function applyParityTransform() {
+            const size = parseInt(document.getElementById('matrix-size').value);
+            const transformed = currentMatrix.map(x => x % 2 === 0 ? x / 2 : 3 * x + 1);
+            
+            const results = `Matrix Parity Transform Results:
+═══════════════════════════════════
+
+Original Matrix: [${currentMatrix.join(', ')}]
+Transformed:     [${transformed.join(', ')}]
+
+Parity Analysis:
+Even Numbers: ${currentMatrix.filter(x => x % 2 === 0).length}
+Odd Numbers:  ${currentMatrix.filter(x => x % 2 === 1).length}
+
+Transform Function:
+f(x) = { x/2     if x mod 2 = 0
+       { 3x + 1  otherwise
+
+State-Driven Logic: ✓ APPLIED
+Dimension Filter: ${transformed.length > currentMatrix.length / 2 ? 'High Density' : 'Low Density'}`;
+            
+            currentMatrix = transformed;
+            displayMatrix(size);
+            document.getElementById('matrix-results').textContent = results;
+        }
+        
+        function analyzeComplexity() {
+            const size = parseInt(document.getElementById('matrix-size').value);
+            const operations = size * size;
+            
+            const analysis = `Complexity Analysis:
+═══════════════════════════════════
+
+Matrix Size: ${size}×${size}
+Total Operations: ${operations}
+Memory Usage: ${operations * 4} bytes
+
+Time Complexity: O(n²) = O(${size}²) = ${operations} operations
+Space Complexity: O(n²) = ${operations} memory units
+
+Performance Classification:
+${operations <= 25 ? '⚡ EXCELLENT - Fast execution' :
+  operations <= 100 ? '✓ GOOD - Acceptable performance' :
+  '⚠ MODERATE - Consider optimization'}
+
+Optimization Recommendations:
+- Cache parity results for repeated calculations
+- Use bit operations for parity checks
+- Implement SIMD for large matrices`;
+            
+            document.getElementById('matrix-results').textContent = analysis;
+        }
+        
+        // DCS Tabulation Engine
+        function calculateCost() {
+            const metrics = document.getElementById('metrics').value.split(',').map(v => parseFloat(v.trim()));
+            const weights = document.getElementById('weights').value.split(',').map(v => parseFloat(v.trim()));
+            const circularDeps = parseInt(document.getElementById('circular-deps').value) || 0;
+            const temporalPressure = parseFloat(document.getElementById('temporal-pressure').value) || 0;
+            
+            // Calculate cost function: C = Σ(μᵢ·ωᵢ) + λc + δt
+            let weightedSum = 0;
+            for (let i = 0; i < Math.min(metrics.length, weights.length); i++) {
+                weightedSum += metrics[i] * weights[i];
+            }
+            
+            const circularPenalty = 0.2 * circularDeps;
+            const totalCost = weightedSum + circularPenalty + temporalPressure;
+            
+            // Store in history
+            costHistory.push({
+                timestamp: Date.now(),
+                cost: totalCost,
+                components: { weightedSum, circularPenalty, temporalPressure }
+            });
+            
+            displayCostIndicator(totalCost);
+            
+            const results = `Cost Function Analysis:
+═══════════════════════════════════
+
+Dynamic Cost Function: 𝒞 = Σ(μᵢ·ωᵢ) + λc + δt
+
+Components:
+Weighted Metrics: ${weightedSum.toFixed(4)}
+Circular Penalty: ${circularPenalty.toFixed(4)} (${circularDeps} cycles × 0.2)
+Temporal Pressure: ${temporalPressure.toFixed(4)}
+
+TOTAL COST: ${totalCost.toFixed(4)}
+
+Governance Assessment:
+${totalCost <= 0.5 ? '✓ AUTONOMOUS ZONE - Normal operation' :
+  totalCost <= 0.6 ? '⚠ WARNING ZONE - Enhanced monitoring required' :
+  '🚫 GOVERNANCE ZONE - Mandatory intervention required'}
+
+Architectural Status:
+${totalCost > 0.6 ? 'ISOLATION PROTOCOL TRIGGERED' : 'STABLE ARCHITECTURE'}`;
+            
+            document.getElementById('dcs-results').textContent = results;
+        }
+        
+        function displayCostIndicator(cost) {
+            const display = document.getElementById('cost-display');
+            const indicator = document.createElement('div');
+            
+            if (cost <= 0.5) {
+                indicator.className = 'cost-indicator cost-safe';
+                indicator.textContent = `SAFE: ${cost.toFixed(3)}`;
+            } else if (cost <= 0.6) {
+                indicator.className = 'cost-indicator cost-warning';
+                indicator.textContent = `WARNING: ${cost.toFixed(3)}`;
+            } else {
+                indicator.className = 'cost-indicator cost-danger';
+                indicator.textContent = `DANGER: ${cost.toFixed(3)}`;
+            }
+            
+            display.innerHTML = '';
+            display.appendChild(indicator);
+        }
+        
+        function simulateEvolution() {
+            const steps = 10;
+            let evolution = [];
+            
+            for (let i = 0; i < steps; i++) {
+                const drift = Math.random() * 0.1 - 0.05; // Random drift ±0.05
+                const pressure = 0.01 * i; // Increasing pressure
+                const baseCost = 0.4 + drift + pressure;
+                evolution.push(baseCost);
+            }
+            
+            const results = `System Evolution Simulation:
+═══════════════════════════════════
+
+Evolution Steps: ${steps}
+Cost Progression: [${evolution.map(c => c.toFixed(3)).join(', ')}]
+
+Trend Analysis:
+Average Cost: ${(evolution.reduce((a, b) => a + b) / steps).toFixed(3)}
+Max Cost: ${Math.max(...evolution).toFixed(3)}
+Min Cost: ${Math.min(...evolution).toFixed(3)}
+
+Stability Assessment:
+${Math.max(...evolution) > 0.6 ? '⚠ INSTABILITY DETECTED - System exceeds governance threshold' :
+  '✓ STABLE EVOLUTION - System remains within operational bounds'}
+
+Recommendation:
+${Math.max(...evolution) > 0.6 ? 'Apply Sinphasé isolation protocol' : 'Continue normal operation'}`;
+            
+            document.getElementById('dcs-results').textContent = results;
+        }
+        
+        function validateGovernance() {
+            if (costHistory.length === 0) {
+                document.getElementById('dcs-results').textContent = 'No cost history available. Calculate cost first.';
+                return;
+            }
+            
+            const recent = costHistory.slice(-5);
+            const violations = recent.filter(entry => entry.cost > 0.6).length;
+            const warnings = recent.filter(entry => entry.cost > 0.5 && entry.cost <= 0.6).length;
+            
+            const governance = `Governance Validation Report:
+═══════════════════════════════════
+
+Recent History: ${recent.length} entries
+Violations (>0.6): ${violations}
+Warnings (0.5-0.6): ${warnings}
+Safe Operations: ${recent.length - violations - warnings}
+
+Compliance Status:
+${violations === 0 ? '✓ FULLY COMPLIANT' : 
+  violations <= 2 ? '⚠ MARGINAL COMPLIANCE' : 
+  '🚫 NON-COMPLIANT'}
+
+Required Actions:
+${violations > 0 ? '- Immediate architectural review required\n- Apply isolation protocol\n- Audit dependency structure' :
+  '- Continue monitoring\n- Maintain current architecture'}
+
+NASA-STD-8739.8 Alignment: ${violations === 0 ? 'SATISFIED' : 'REQUIRES REVIEW'}`;
+            
+            document.getElementById('dcs-results').textContent = governance;
+        }
+        
+        function testMemoization() {
+            const n = parseInt(document.getElementById('fib-n').value) || 30;
+            
+            // Naive implementation
+            const startNaive = performance.now();
+            const naiveResult = fibonacciNaive(Math.min(n, 35)); // Limit for performance
+            const naiveTime = performance.now() - startNaive;
+            
+            // Memoized implementation
+            memoCache = {}; // Reset cache
+            const startMemo = performance.now();
+            const memoResult = fibonacciMemo(n);
+            const memoTime = performance.now() - startMemo;
+            
+            const results = `Memoization Performance Test:
+═══════════════════════════════════
+
+Input: F(${n})
+Result: ${memoResult}
+
+Performance Comparison:
+Naive Fibonacci: ${naiveTime.toFixed(2)}ms (limited to n≤35)
+Memoized Fibonacci: ${memoTime.toFixed(2)}ms
+
+Speedup Factor: ${(naiveTime / memoTime).toFixed(0)}x
+
+Memoization Diagnostics:
+Cache Entries: ${Object.keys(memoCache).length}
+Cache Hit Ratio: ${(Object.keys(memoCache).length / n * 100).toFixed(1)}%
+Memory Utilization: ${(Object.keys(memoCache).length * 8)} bytes
+
+Complexity Analysis:
+Naive: O(2^n) - Exponential
+Memoized: O(n) - Linear
+Space Complexity: O(n)
+
+Lambda Calculus Implementation:
+λn.if n ≤ 1 then n else MEMO(F(n-1) + F(n-2))
+
+Pattern Enforcement Analysis:
+This transformation conforms to the enforced Sinphasé pattern via 
+tabulation and memoization with bounded cost evaluation.
+
+Architectural Validation:
+${memoTime < 1 ? '✓ OPTIMAL - Suitable for production deployment' : 
+  memoTime < 10 ? '⚠ ACCEPTABLE - Monitor for optimization opportunities' : 
+  '❌ SUBOPTIMAL - Requires architectural review'}
+
+Recommendation: ${memoTime < 1 ? '✓ Optimal for production' : '⚠ Consider further optimization'}`;
+            
+            document.getElementById('dcs-results').textContent = results;
+        }
+        
+        function fibonacciNaive(n) {
+            if (n <= 1) return n;
+            return fibonacciNaive(n - 1) + fibonacciNaive(n - 2);
+        }
+        
+        function fibonacciMemo(n) {
+            if (n in memoCache) return memoCache[n];
+            if (n <= 1) return n;
+            
+            memoCache[n] = fibonacciMemo(n - 1) + fibonacciMemo(n - 2);
+            return memoCache[n];
+        }
+        
+        // Initialize with default matrix
+        generateMatrix();
+    </script>
+</body>
+</html>

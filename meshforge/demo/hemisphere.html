@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Hemisphere Visualization</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #1a1a1a;
+        }
+        canvas {
+            border: 1px solid #333;
+            background: #000;
+        }
+        .controls {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <label>
+            Detail: <input type="range" id="detail" min="5" max="50" value="20">
+        </label>
+        <br>
+        <label>
+            Radius: <input type="range" id="radius" min="50" max="300" value="150">
+        </label>
+    </div>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        // Vector implementation
+        var Vector = (function() {
+            class Vec3 {
+                constructor(x = 0, y = 0, z = 0) {
+                    this.x = x;
+                    this.y = y;
+                    this.z = z;
+                }
+
+                clone() {
+                    return new Vec3(this.x, this.y, this.z);
+                }
+
+                add(v) {
+                    if (v instanceof Vec3) {
+                        this.x += v.x;
+                        this.y += v.y;
+                        this.z += v.z;
+                    } else {
+                        this.x += v;
+                        this.y += v;
+                        this.z += v;
+                    }
+                    return this;
+                }
+
+                sub(v) {
+                    if (v instanceof Vec3) {
+                        this.x -= v.x;
+                        this.y -= v.y;
+                        this.z -= v.z;
+                    } else {
+                        this.x -= v;
+                        this.y -= v;
+                        this.z -= v;
+                    }
+                    return this;
+                }
+
+                mul(v) {
+                    if (v instanceof Vec3) {
+                        this.x *= v.x;
+                        this.y *= v.y;
+                        this.z *= v.z;
+                    } else {
+                        this.x *= v;
+                        this.y *= v;
+                        this.z *= v;
+                    }
+                    return this;
+                }
+
+                normalize() {
+                    const len = this.length();
+                    if (len !== 0) {
+                        this.x /= len;
+                        this.y /= len;
+                        this.z /= len;
+                    }
+                    return this;
+                }
+
+                length() {
+                    return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+                }
+
+                dot(v) {
+                    return this.x * v.x + this.y * v.y + this.z * v.z;
+                }
+
+                cross(v) {
+                    const x = this.y * v.z - this.z * v.y;
+                    const y = this.z * v.x - this.x * v.z;
+                    const z = this.x * v.y - this.y * v.x;
+                    this.x = x;
+                    this.y = y;
+                    this.z = z;
+                    return this;
+                }
+
+                rotateX(angle) {
+                    const y = this.y;
+                    const z = this.z;
+                    this.y = y * Math.cos(angle) - z * Math.sin(angle);
+                    this.z = z * Math.cos(angle) + y * Math.sin(angle);
+                    return this;
+                }
+
+                rotateY(angle) {
+                    const x = this.x;
+                    const z = this.z;
+                    this.x = x * Math.cos(angle) + z * Math.sin(angle);
+                    this.z = z * Math.cos(angle) - x * Math.sin(angle);
+                    return this;
+                }
+
+                rotateZ(angle) {
+                    const x = this.x;
+                    const y = this.y;
+                    this.x = x * Math.cos(angle) - y * Math.sin(angle);
+                    this.y = y * Math.cos(angle) + x * Math.sin(angle);
+                    return this;
+                }
+            }
+
+            return { Vec3 };
+        })();
+
+        // HemiSphere implementation
+        class HemiSphere {
+            constructor({ origin, radius, detail }) {
+                this.origin = origin || new Vector.Vec3(0, 0, 0);
+                this.radius = radius || 150;
+                this.detail = detail || 20;
+                this.vertices = [];
+                this.faces = [];
+                this.normals = [];
+                this.init();
+            }
+
+            init() {
+                this.vertices = [];
+                this.faces = [];
+                this.normals = [];
+
+                for (let i = 0; i <= this.detail; i++) {
+                    const phi = (Math.PI * i) / (2 * this.detail);
+                    for (let j = 0; j <= this.detail; j++) {
+                        const theta = (2 * Math.PI * j) / this.detail;
+                        
+                        const x = this.radius * Math.sin(phi) * Math.cos(theta);
+                        const y = this.radius * Math.cos(phi);
+                        const z = this.radius * Math.sin(phi) * Math.sin(theta);
+                        
+                        this.vertices.push(x, y, z);
+                        
+                        const normal = new Vector.Vec3(x, y, z).normalize();
+                        this.normals.push(normal.x, normal.y, normal.z);
+                    }
+                }
+
+                for (let i = 0; i < this.detail; i++) {
+                    for (let j = 0; j < this.detail; j++) {
+                        const a = i * (this.detail + 1) + j;
+                        const b = a + 1;
+                        const c = (i + 1) * (this.detail + 1) + j;
+                        const d = c + 1;
+
+                        this.faces.push(a, b, c);
+                        this.faces.push(b, d, c);
+                    }
+                }
+            }
+
+            draw(ctx, options = { drawMode: "wireframe" }) {
+                const vertices = [];
+                for (let i = 0; i < this.vertices.length; i += 3) {
+                    const v = new Vector.Vec3(
+                        this.vertices[i],
+                        this.vertices[i + 1],
+                        this.vertices[i + 2]
+                    );
+                    vertices.push(v);
+                }
+
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+                ctx.beginPath();
+
+                for (let i = 0; i < this.faces.length; i += 3) {
+                    const v1 = vertices[this.faces[i]];
+                    const v2 = vertices[this.faces[i + 1]];
+                    const v3 = vertices[this.faces[i + 2]];
+
+                    ctx.moveTo(v1.x + this.origin.x, v1.y + this.origin.y);
+                    ctx.lineTo(v2.x + this.origin.x, v2.y + this.origin.y);
+                    ctx.lineTo(v3.x + this.origin.x, v3.y + this.origin.y);
+                    ctx.lineTo(v1.x + this.origin.x, v1.y + this.origin.y);
+                }
+
+                ctx.stroke();
+            }
+
+            rotateX(angle) {
+                for (let i = 0; i < this.vertices.length; i += 3) {
+                    const v = new Vector.Vec3(
+                        this.vertices[i],
+                        this.vertices[i + 1],
+                        this.vertices[i + 2]
+                    );
+                    v.rotateX(angle);
+                    this.vertices[i] = v.x;
+                    this.vertices[i + 1] = v.y;
+                    this.vertices[i + 2] = v.z;
+                }
+            }
+
+            rotateY(angle) {
+                for (let i = 0; i < this.vertices.length; i += 3) {
+                    const v = new Vector.Vec3(
+                        this.vertices[i],
+                        this.vertices[i + 1],
+                        this.vertices[i + 2]
+                    );
+                    v.rotateY(angle);
+                    this.vertices[i] = v.x;
+                    this.vertices[i + 1] = v.y;
+                    this.vertices[i + 2] = v.z;
+                }
+            }
+        }
+
+        // Setup canvas and hemisphere
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth * 0.8;
+            canvas.height = window.innerHeight * 0.8;
+        }
+        
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const detailSlider = document.getElementById('detail');
+        const radiusSlider = document.getElementById('radius');
+
+        let sphere = new HemiSphere({
+            origin: new Vector.Vec3(canvas.width / 2, canvas.height / 2, 0),
+            radius: parseInt(radiusSlider.value),
+            detail: parseInt(detailSlider.value)
+        });
+
+        detailSlider.addEventListener('input', () => {
+            sphere = new HemiSphere({
+                origin: new Vector.Vec3(canvas.width / 2, canvas.height / 2, 0),
+                radius: parseInt(radiusSlider.value),
+                detail: parseInt(detailSlider.value)
+            });
+        });
+
+        radiusSlider.addEventListener('input', () => {
+            sphere = new HemiSphere({
+                origin: new Vector.Vec3(canvas.width / 2, canvas.height / 2, 0),
+                radius: parseInt(radiusSlider.value),
+                detail: parseInt(detailSlider.value)
+            });
+        });
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            sphere.rotateY(0.02);
+            sphere.rotateX(0.01);
+            sphere.draw(ctx, { drawMode: "wireframe" });
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
