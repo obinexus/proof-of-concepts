@@ -1,0 +1,84 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\title{Building the Perfect Rice Cooker: A Physics-First Approach}
+\author{Nnamdi Michael Okpala\\OBINexus Computing}
+\date{January 23, 2025}
+
+\begin{document}
+
+\maketitle
+
+\abstract{
+This paper presents a theoretical framework for optimizing cooking times based on thermodynamic principles. We derive a general formula for cooking duration and demonstrate its application in building an intelligent rice cooker. Our analysis focuses on a 100g sample size to illustrate the practical implementation of these principles.
+}
+
+\section{Introduction}
+The process of cooking, while often treated as an art, fundamentally operates on precise physical principles. This paper examines the thermodynamics underlying cooking processes and applies these principles to the development of an intelligent rice cooker.
+
+\section{Theoretical Framework}
+\subsection{Heat Transfer and Work}
+The fundamental equation governing heat transfer in cooking is:
+\begin{equation}
+Q = m \cdot c \cdot \Delta T
+\end{equation}
+where:
+\begin{itemize}
+    \item $Q$ is the heat energy required (Joules)
+    \item $m$ is the mass of food (kilograms)
+    \item $c$ is the specific heat capacity (J/kg°C)
+    \item $\Delta T$ is the temperature change (°C)
+\end{itemize}
+
+\subsection{Time-Power Relationship}
+The relationship between work done ($W$), power ($P$), and time ($t$) is expressed as:
+\begin{equation}
+t = \frac{W}{P}
+\end{equation}
+
+\subsection{Combined Cooking Time Formula}
+Combining equations (1) and (2) yields our master formula:
+\begin{equation}
+t = \frac{m \cdot c \cdot \Delta T}{P}
+\end{equation}
+
+\section{Practical Application}
+\subsection{Sample Calculation}
+For a 100g food sample:
+\begin{align*}
+m &= 0.1 \text{ kg}\\
+c &= 4180 \text{ J/kg°C}\\
+\Delta T &= 20\text{°C}\\
+P &= 100 \text{ W}
+\end{align*}
+
+Substituting into equation (3):
+\begin{equation}
+t = \frac{0.1 \text{ kg} \cdot 4180 \text{ J/kg°C} \cdot 20\text{°C}}{100 \text{ W}} = 83.6 \text{ seconds}
+\end{equation}
+
+\section{Implementation in Rice Cooker Design}
+The theoretical framework presented above informs the design of an intelligent rice cooker through:
+\begin{enumerate}
+    \item Real-time mass measurement via weight sensors
+    \item Temperature monitoring through thermal probes
+    \item Dynamic power adjustment based on equation (3)
+    \item Continuous recalculation of remaining cooking time
+\end{enumerate}
+
+\section{Conclusion}
+Understanding the physics of cooking enables precise control over cooking processes. Our derived formula provides a theoretical foundation for developing intelligent cooking devices that can automatically adjust cooking parameters for optimal results.
+
+\section{Future Work}
+Future research will focus on:
+\begin{itemize}
+    \item Accounting for phase changes in water during rice cooking
+    \item Incorporating moisture content as a variable
+    \item Developing machine learning models for fine-tuning cooking parameters
+\end{itemize}
+
+\end{document}
